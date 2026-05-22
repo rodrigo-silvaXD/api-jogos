@@ -59,4 +59,4 @@ api-jogos/
 
 ---
 
-UniFECAF — Engenharia de Software
+UniFECAF — Engenharia da Computação
