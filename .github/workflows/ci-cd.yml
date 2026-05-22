@@ -1,0 +1,62 @@
+name: CI/CD — API de Jogos Digitais
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validar:
+    name: Validar Contrato OpenAPI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instalar Spectral CLI
+        run: npm install -g @stoplight/spectral-cli
+
+      - name: Validar openapi.yaml com Spectral
+        run: spectral lint openapi.yaml
+
+  publicar-docs:
+    name: Publicar Documentação no GitHub Pages
+    runs-on: ubuntu-latest
+    needs: validar
+    if: github.ref == 'refs/heads/main'
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instalar Redoc CLI
+        run: npm install -g @redocly/cli
+
+      - name: Criar pasta de saída
+        run: mkdir -p docs
+
+      - name: Gerar documentação HTML com Redoc
+        run: redocly build-docs openapi.yaml --output docs/index.html
+
+      - name: Publicar no GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs

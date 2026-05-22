@@ -1,0 +1,265 @@
+openapi: 3.0.3
+info:
+  title: API de Jogos Digitais
+  description: >
+    API REST para gerenciamento de um catálogo de jogos digitais.
+    Permite cadastrar, consultar, atualizar e remover jogos do acervo.
+  version: 1.0.0
+  contact:
+    name: Grupo UniFECAF
+    email: contato@apijogos.dev
+
+servers:
+  - url: https://api.jogos.dev/v1
+    description: Servidor de produção
+
+tags:
+  - name: Jogos
+    description: Operações relacionadas ao catálogo de jogos
+
+paths:
+  /jogos:
+    get:
+      tags:
+        - Jogos
+      summary: Listar todos os jogos
+      description: Retorna a lista completa de jogos cadastrados no catálogo. É possível filtrar pelo gênero via query parameter.
+      operationId: listarJogos
+      parameters:
+        - name: genero
+          in: query
+          description: Filtrar jogos por gênero
+          required: false
+          schema:
+            type: string
+            example: Ação
+      responses:
+        '200':
+          description: Lista de jogos retornada com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Jogo'
+
+    post:
+      tags:
+        - Jogos
+      summary: Cadastrar um novo jogo
+      description: Cadastra um novo jogo no catálogo com os dados informados no corpo da requisição.
+      operationId: criarJogo
+      requestBody:
+        required: true
+        description: Dados do jogo a ser cadastrado
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JogoInput'
+      responses:
+        '201':
+          description: Jogo cadastrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Jogo'
+        '400':
+          description: Dados inválidos na requisição
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+
+  /jogos/{id}:
+    get:
+      tags:
+        - Jogos
+      summary: Buscar jogo por ID
+      description: Retorna os dados de um jogo específico a partir do seu identificador único.
+      operationId: buscarJogoPorId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID único do jogo
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Jogo encontrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Jogo'
+        '404':
+          description: Jogo não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+
+    put:
+      tags:
+        - Jogos
+      summary: Atualizar dados de um jogo
+      description: Atualiza as informações de um jogo existente identificado pelo ID informado na URL.
+      operationId: atualizarJogo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID único do jogo
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      requestBody:
+        required: true
+        description: Dados atualizados do jogo
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JogoInput'
+      responses:
+        '200':
+          description: Jogo atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Jogo'
+        '400':
+          description: Dados inválidos na requisição
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '404':
+          description: Jogo não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+
+    delete:
+      tags:
+        - Jogos
+      summary: Remover um jogo do catálogo
+      description: Remove permanentemente um jogo do catálogo a partir do seu ID.
+      operationId: deletarJogo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID único do jogo
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '204':
+          description: Jogo removido com sucesso
+        '404':
+          description: Jogo não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+
+components:
+  schemas:
+    Jogo:
+      type: object
+      required:
+        - id
+        - titulo
+        - genero
+        - plataforma
+        - anoLancamento
+        - desenvolvedora
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Identificador único do jogo
+          example: 1
+        titulo:
+          type: string
+          description: Título do jogo
+          example: "God of War"
+        genero:
+          type: string
+          description: Gênero do jogo
+          example: "Ação"
+        plataforma:
+          type: string
+          description: Plataforma em que o jogo está disponível
+          example: "PlayStation 4"
+        anoLancamento:
+          type: integer
+          description: Ano de lançamento do jogo
+          example: 2018
+        desenvolvedora:
+          type: string
+          description: Empresa responsável pelo desenvolvimento
+          example: "Santa Monica Studio"
+        nota:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 10
+          description: Nota do jogo de 0 a 10
+          example: 9.5
+
+    JogoInput:
+      type: object
+      required:
+        - titulo
+        - genero
+        - plataforma
+        - anoLancamento
+        - desenvolvedora
+      properties:
+        titulo:
+          type: string
+          description: Título do jogo
+          example: "God of War"
+        genero:
+          type: string
+          description: Gênero do jogo
+          example: "Ação"
+        plataforma:
+          type: string
+          description: Plataforma em que o jogo está disponível
+          example: "PlayStation 4"
+        anoLancamento:
+          type: integer
+          description: Ano de lançamento do jogo
+          example: 2018
+        desenvolvedora:
+          type: string
+          description: Empresa responsável pelo desenvolvimento
+          example: "Santa Monica Studio"
+        nota:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 10
+          description: Nota do jogo de 0 a 10
+          example: 9.5
+
+    Erro:
+      type: object
+      required:
+        - codigo
+        - mensagem
+      properties:
+        codigo:
+          type: integer
+          description: Código HTTP do erro
+          example: 404
+        mensagem:
+          type: string
+          description: Descrição do erro ocorrido
+          example: "Jogo não encontrado"
